@@ -19,6 +19,9 @@ function getAgentBellHooks(): Record<string, ClaudeHookRule[]> {
     Stop: [
       makeRule("", "agent-bell play task-complete --source claude"),
     ],
+    StopFailure: [
+      makeRule("", "agent-bell play error --source claude"),
+    ],
     Notification: [
       makeRule("permission_prompt", "agent-bell play needs-input --source claude"),
       makeRule("idle_prompt", "agent-bell play needs-input --source claude"),
