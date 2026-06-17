@@ -40,7 +40,7 @@ After updating, run `agent-bell doctor` to verify your setup. If you've customiz
 
 | Tool            | Hook mechanism                                                                  |
 | --------------- | ------------------------------------------------------------------------------- |
-| **Claude Code** | Writes to `~/.claude/settings.json` — hooks on `Stop` and `Notification` events |
+| **Claude Code** | Writes to `~/.claude/settings.json` — hooks on `Stop`, `StopFailure`, and `Notification` events |
 | **Cursor**      | Installs event hooks in Cursor's config                                         |
 | **Gemini CLI**  | Writes to Gemini's settings file with matcher-based hooks                       |
 | **OpenCode**    | Writes to OpenCode's config with event-based plugin                             |
@@ -183,6 +183,9 @@ Run `agent-bell doctor` and `agent-bell test`. Check your hooks with `agent-bell
 **Does it work on Linux?**
 Sound and desktop notifications work. TTS needs `espeak` or similar.
 
+**Does it work on WSL?**
+Yes — audio is automatically routed through PowerShell to the Windows audio system. No PulseAudio required.
+
 **Different settings per tool?**
 Not yet — on the roadmap. All tools share one config.
 
@@ -199,6 +202,7 @@ Not yet — on the roadmap. All tools share one config.
 - **Node.js** >= 18
 - **macOS** (primary) — full support for all notification methods
 - **Linux** — sound and desktop notifications work; TTS requires `espeak` or similar
+- **WSL** (Windows Subsystem for Linux) — supported; audio is bridged to Windows via PowerShell
 
 ## License
 
