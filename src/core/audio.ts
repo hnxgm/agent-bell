@@ -1,30 +1,33 @@
-import { existsSync } from "node:fs";
+import { existsSync, copyFileSync, unlinkSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { getAudioPlayer, isWsl, toWindowsPath } from "../utils/platform.js";
 import { spawnWithTimeout } from "../utils/spawn.js";
 import { logToFile } from "../utils/logger.js";
 
-function playSoundWsl(filePath: string, volume: number): void {
-  // Convert the Linux path to a Windows path so PowerShell can open it.
-  // Pass it as an env var to avoid any shell-quoting/injection issues.
-  const winPath = toWindowsPath(filePath);
-  const vol = volume.toFixed(2);
-  // Use MediaPlayer (presentationCore) for volume control.
-  // The file path is read from $env:AB_SOUND_FILE — never interpolated as code.
-  const script = [
-    "Add-Type -AssemblyName presentationCore;",
-    "$m = [System.Windows.Media.MediaPlayer]::new();",
-    "$m.Open([Uri]::new($env:AB_SOUND_FILE));",
-    `$m.Volume = ${vol};`,
-    "$m.Play();",
-    "Start-Sleep -Milliseconds 3000;",
-    "$m.Close()",
-  ].join(" ");
+function playSoundWsl(filePath: string): void {
+  // SoundPlayer cannot read from \\wsl.localhost\ UNC paths.
+  // Copy the wav to the Windows TEMP directory first, then play and delete.
+  const winTemp = execFileSync("powershell.exe", [
+    "-NoProfile", "-NonInteractive", "-Command", "[System.IO.Path]::GetTempPath()",
+  ]).toString().trim();
+  const winTempLinux = execFileSync("wslpath", ["-u", winTemp])
+    .toString().trim();
+  const tmpFile = `${winTempLinux}/agent-bell-${Date.now()}.wav`;
+
+  copyFileSync(filePath, tmpFile);
+  const tmpWinPath = toWindowsPath(tmpFile);
+
+  const script = `(New-Object Media.SoundPlayer '${tmpWinPath.replaceAll("'", "''")}').PlaySync()`;
 
   spawnWithTimeout(
     "powershell.exe",
     ["-NoProfile", "-NonInteractive", "-Command", script],
-    { env: { ...process.env, AB_SOUND_FILE: winPath } },
   );
+
+  // Clean up after a delay longer than the longest wav file (~3s)
+  setTimeout(() => {
+    try { unlinkSync(tmpFile); } catch { /* already gone */ }
+  }, 10_000);
 }
 
 export function playSound(filePath: string, volume = 0.7): void {
@@ -32,7 +35,7 @@ export function playSound(filePath: string, volume = 0.7): void {
 
   try {
     if (isWsl()) {
-      playSoundWsl(filePath, volume);
+      playSoundWsl(filePath);
       return;
     }
 
