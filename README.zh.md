@@ -1,5 +1,7 @@
 # agent-bell
 
+[English](README.md) | [中文](README.zh.md)
+
 **AI 编程助手的音频提醒工具 — 任务完成、出错或需要你决策时，第一时间知晓。**
 
 [![npm version](https://img.shields.io/npm/v/agent-bell)](https://www.npmjs.com/package/agent-bell)

@@ -1,5 +1,7 @@
 # agent-bell
 
+[English](README.md) | [中文](README.zh.md)
+
 **Audio notifications for AI coding agents — never miss when your agent finishes, errors, or needs input.**
 
 [![npm version](https://img.shields.io/npm/v/agent-bell)](https://www.npmjs.com/package/agent-bell)
